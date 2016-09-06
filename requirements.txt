@@ -1,0 +1,6 @@
+jupyter
+Pillow
+Numpy
+SciPy
+matplotlib
+scikit-image
