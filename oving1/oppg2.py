@@ -98,8 +98,8 @@ plot_fig(darkened_image_with_gamma, 'gray')
 plot_fig(brightened_image_with_gamma, 'gray')
 plot_fig(inverted_image, 'gray')
 
-plt.imsave('oppg2-inverted_image.png', inverted_image)
-plt.imsave('oppg2-gamma-darker.png', darkened_image_with_gamma)
-plt.imsave('oppg2-gamma-brighter.png', brightened_image_with_gamma)
+plt.imsave('oppg2-inverted_image.png', inverted_image, cmap=plt.cm.gray)
+plt.imsave('oppg2-gamma-darker.png', darkened_image_with_gamma, cmap=plt.cm.gray)
+plt.imsave('oppg2-gamma-brighter.png', brightened_image_with_gamma, cmap=plt.cm.gray)
 
 plt.show()
