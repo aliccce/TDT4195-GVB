@@ -48,6 +48,7 @@ def convolution(image, kernel):
             new_image[y, x] = np.float32(accumulator)
     return new_image
 
+
 """ Create kernels """
 box_blur = [[1/9]*3]*3
 
@@ -61,10 +62,16 @@ for i in range(len(gaussian)):
     for j in range(len(gaussian[i])):
         gaussian[i][j] /= 256
 
+""" Read file """
+
 image = misc.imread(".\Cute-a-bunny.jpg", flatten=True)
+
+""" Do convolution """
 
 box_blur_image = convolution(image, box_blur)
 gaussian_image = convolution(image, gaussian)
+
+""" Plot and save results """
 
 _, ax = plt.subplots(1, 3)
 ax[0].imshow(image, interpolation="nearest", cmap=plt.cm.gray)
