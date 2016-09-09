@@ -53,11 +53,6 @@ def linear_comb(img, kernel):
 
 	center = np.median(np.array(range(a)))
 
-	kernel_sum = 0
-	for x in range(a):
-		for y in range(b):
-			kernel_sum += kernel[x,y]
-
 	for m in range(1, c-1):
 		for n in range(1, d-1):
 
@@ -69,7 +64,7 @@ def linear_comb(img, kernel):
 					#print c-m+y, c-n+x
 					value += img[m-c+y, n-c+x]*kernel[x,y]
 
-			new_img[m, n] = value/kernel_sum
+			new_img[m, n] = value/256
 
 	return new_img
 
