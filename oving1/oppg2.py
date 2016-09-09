@@ -4,15 +4,12 @@ from scipy import misc
 import matplotlib.pyplot as plt
 
 
-def pixel_brightness(greyscale_im, p):
+def invert(greyscale_im):
 
     transformed_image = np.zeros_like(greyscale_im)
     for y in range(greyscale_im.shape[1]):
         for x in range(greyscale_im.shape[0]):
-            transformed_image[x, y] = greyscale_im[x, y] - p if 255 - p > 0 else 0
-
-    plt.figure()
-    plt.imshow(transformed_image, interpolation='nearest', cmap=plt.cm.gray, vmin=0, vmax= 255 -p)
+            transformed_image[x, y] = 255 - greyscale_im[x, y]
 
     return transformed_image
 
@@ -88,7 +85,7 @@ image = rgb2gray(image)
 image = image.astype(np.float32)
 
 """ Perform function from task 2a """
-darkened_image_with_pixel_brightness = pixel_brightness(image, 100)
+inverted_image = invert(image)
 
 """ Normalize and perform gamma function """
 image = normalize(image)
@@ -99,8 +96,9 @@ brightened_image_with_gamma = gamma(image, 1.2)  # >1 lightens the picture
 plot_fig(image, 'gray')
 plot_fig(darkened_image_with_gamma, 'gray')
 plot_fig(brightened_image_with_gamma, 'gray')
+plot_fig(inverted_image, 'gray')
 
-plt.imsave('oppg2-pixel_brightness.png', darkened_image_with_pixel_brightness)
+plt.imsave('oppg2-inverted_image.png', inverted_image)
 plt.imsave('oppg2-gamma-darker.png', darkened_image_with_gamma)
 plt.imsave('oppg2-gamma-brighter.png', brightened_image_with_gamma)
 
