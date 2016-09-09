@@ -22,8 +22,8 @@ def convolution(image, kernel):
     n = kernel.shape[0] // 2
     new_image = np.zeros_like(image)
 
-    num_of_cols = image.shape[0]
-    num_of_rows = image.shape[1]
+    num_of_rows = image.shape[0]
+    num_of_cols = image.shape[1]
 
     #Flips kernel, and runs correlation
     flipped_kernel = flip_kernel(kernel)
@@ -43,9 +43,9 @@ def convolution(image, kernel):
                         # Checks whether the kernel is at the edges of the image
                         accumulator += 0
                     else:
-                        accumulator += image[image_col, image_row] * flipped_kernel[kernel_col, kernel_row]
+                        accumulator += image[image_row, image_col] * flipped_kernel[kernel_row, kernel_col]
 
-            new_image[x, y] = np.float32(accumulator)
+            new_image[y, x] = np.float32(accumulator)
     return new_image
 
 """ Create kernels """
@@ -74,6 +74,9 @@ ax[0].set_axis_off()
 ax[1].set_axis_off()
 ax[2].set_axis_off()
 
+
 misc.imsave('oppg3-before.png', image)
 misc.imsave('oppg3-box_blur.png', gaussian_image)
 misc.imsave('oppg3-gaussian.png', box_blur_image)
+
+plt.show()
