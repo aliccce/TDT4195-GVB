@@ -1,3 +1,7 @@
+
+# Created by https://www.gitignore.io/api/python,pycharm
+
+### Python ###
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
@@ -79,6 +83,7 @@ celerybeat-schedule
 .env
 
 # virtualenv
+.venv/
 venv/
 ENV/
 
@@ -87,8 +92,6 @@ ENV/
 
 # Rope project settings
 .ropeproject
-
-
 
 
 ### PyCharm ###
