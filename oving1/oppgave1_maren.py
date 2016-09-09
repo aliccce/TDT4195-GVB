@@ -62,7 +62,7 @@ def gen_diff(img1, img2, diff):
 			if img1[x,y] != img2[x,y]:
 				diff[x,y] = 0
 
-image = read_img('/home/maren/MTDT/TDT4195/images/kitten.jpg')
+image = read_img('./kitten.jpg')
 
 plot_fig(image)
 
