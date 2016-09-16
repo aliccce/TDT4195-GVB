@@ -67,6 +67,21 @@ def rearrange_channels(r, g, b, image):
     return image
 
 
+image = misc.imread("elephant.jpg", flatten=True)
+
+
+high_pass_kernel = np.matrix([[0, -1, 0],
+                              [-1, -4, -1],
+                              [0, -1, 0]])
+
+
+thing = convolution(image, high_pass_kernel)
+
+plt.imshow(thing, cmap=plt.cm.gray)
+plt.show()
+
+
+
 
 """ Create kernels """
 box_blur = [[1/9]*3]*3
