@@ -47,6 +47,7 @@ structure = [[1, 1, 1], [1, 1, 1], [1, 1, 1]]
 
 image = misc.imread('images/noisy.tiff', flatten=True)
 
+# hei på deg
 
 image = normalize(image, 255)
 image = threshold(image)
