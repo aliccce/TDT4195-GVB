@@ -28,11 +28,11 @@ def remove_small_elements(image, structure=None):
 
 def distance_transform(image, structure=None):
     result = np.zeros_like(image).astype('int16')
-    result += image
 
     while True in image:
-        image = ndimage.morphology.binary_erosion(image, structure=structure)
+        # As long as there is some white parts in the image, we well continue with erosion, and add that to result
         result += image
+        image = ndimage.morphology.binary_erosion(image, structure=structure)
 
     return result
 

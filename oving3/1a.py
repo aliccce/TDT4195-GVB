@@ -9,7 +9,8 @@ def read_img(path):
     return image
 
 
-def threshold_alg(img, t_init, dT):  # t_init = initial threshold, dT = delta T
+def threshold_alg(img, t_init, dT):
+    # t_init = initial threshold, dT = delta T
     t_previous = 0
     t = t_init
     s1 = []  # set of pixels where X > T
