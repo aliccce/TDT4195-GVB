@@ -69,8 +69,6 @@ dT = 0.5
 threshold = threshold_alg(image, t_init, dT)
 print("Determined threshold with values t_init =", t_init, ", dT =", dT, ":", threshold)
 
-print(image.max(), image.min())
-
 
 segmented_image = segmentation(image, threshold)
 
