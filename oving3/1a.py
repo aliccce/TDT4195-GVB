@@ -55,10 +55,25 @@ def avg_gsi(img):  # greyscale intensity
     return avg / (a * b)
 
 
+def segmentation(image, threshold):
+    return np.where(image > threshold, [1], [0])
+
+
 image = read_img('images/defective_weld.tif')
 image = image.astype(np.float32)
+average_intensity = avg_gsi(image)
 
-print("Average greyscale intensity in image: ", avg_gsi(image))
-t_init = 173
+print("Average greyscale intensity in image: ", average_intensity)
+t_init = average_intensity
 dT = 0.5
-print("Determined threshold with values t_init =", t_init, ", dT =", dT, ":", threshold_alg(image, t_init, dT))
+threshold = threshold_alg(image, t_init, dT)
+print("Determined threshold with values t_init =", t_init, ", dT =", dT, ":", threshold)
+
+print(image.max(), image.min())
+
+
+segmented_image = segmentation(image, threshold)
+
+plt.imshow(segmented_image, cmap="gray")
+misc.imsave("images/segmentation with threshold.png", segmented_image)
+plt.show()

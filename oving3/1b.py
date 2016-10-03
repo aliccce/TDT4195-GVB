@@ -142,5 +142,9 @@ seeds = [[139, 255], [292, 251], [441, 236], [76, 289], [405, 236]]
 
 plot_fig(image, 'gray')
 div_img = divide_by_thresh(image, t)
-plot_fig(grow_seeds(div_img, seeds), 'gray')
+seed_img = grow_seeds(div_img, seeds)
+plot_fig(seed_img, 'gray')
+misc.imsave("images/seed points.png", seed_img)
 plt.show()
+
+
