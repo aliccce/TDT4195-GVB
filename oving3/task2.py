@@ -4,7 +4,6 @@ from scipy import misc, fftpack, ndimage
 import matplotlib.pyplot as plt
 
 
-
 def threshold(im, a=255/2, max=255):
     new = np.where(im > a, max, 0)
     return new
@@ -29,6 +28,7 @@ def remove_small_elements(image, structure=None):
 
 def distance_transform(image, structure=None):
     result = np.zeros_like(image).astype('int16')
+    result += image
 
     while True in image:
         image = ndimage.morphology.binary_erosion(image, structure=structure)
@@ -43,34 +43,30 @@ def boundary_extraction(image, structure=None):
 
 
 structure = [[1, 1, 1], [1, 1, 1], [1, 1, 1]]
-
-
 image = misc.imread('images/noisy.tiff', flatten=True)
-
-# hei på deg
-
 image = normalize(image, 255)
 image = threshold(image)
 
+""" The image before anything is done """
 plt.imshow(image, cmap="gray")
 plt.show()
 
+""" All white spots are removed """
 new = remove_small_elements(image)
-
 plt.imshow(new, cmap="gray")
 plt.show()
 
+""" And all black holes are filled """
 new = remove_holes(new)
-
 plt.imshow(new, cmap="gray")
 plt.show()
 
+""" The distance transformation is computed """
 distance_trans = distance_transform(new, structure=structure)
-
 plt.imshow(distance_trans, cmap="gray")
 plt.show()
 
+""" And the boundary is computed """
 boundary = boundary_extraction(new, structure=structure)
-
 plt.imshow(boundary, cmap="gray")
 plt.show()
