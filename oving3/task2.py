@@ -70,3 +70,8 @@ plt.show()
 boundary = boundary_extraction(new, structure=structure)
 plt.imshow(boundary, cmap="gray")
 plt.show()
+
+# Saving results
+misc.imsave("images/2a.png", new)
+misc.imsave("images/2b.png", distance_trans)
+misc.imsave("images/2c.png", boundary)
