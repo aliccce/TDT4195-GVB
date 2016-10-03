@@ -51,7 +51,7 @@ def avg_gsi(img): #greyscale intensity
 			
 	return avg / (a*b)
 
-image = read_img('images/Fig1051(a)(defective_weld).tif')
+image = read_img('images/defective_weld.tif')
 image = image.astype(np.float32)
 
 print "Average greyscale intensity in image: ", avg_gsi(image)

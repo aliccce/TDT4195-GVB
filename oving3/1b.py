@@ -121,7 +121,7 @@ def images_equal(img1, img2):
 	return True
 
 
-image = read_img('images/Fig1051(a)(defective_weld).tif')
+image = read_img('images/defective_weld.tif')
 image = image.astype(int)
 
 print "Average greyscale intensity in image: ", avg_gsi(image)
