@@ -18,7 +18,7 @@ void keyboardCallback(GLFWwindow* window, int key, int scancode,
                       int action, int mods);
 
 // VAO-generator function
-unsigned int createVertexArrayObject(float* vertexCoordinates, unsigned int lengthVertices, int* indices, unsigned int lengthIndices);
+unsigned int createVertexArrayObject(float* vertexCoordinates, unsigned int lengthVertices, int* indices, unsigned int lengthIndices, float* colors, unsigned int lengthColors);
 
 
 // Checks for whether an OpenGL error occurred. If one did,

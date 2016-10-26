@@ -27,19 +27,33 @@ void runProgram(GLFWwindow* window)
 						0.15, 0.8, 0.0, 0.3, 0.85, 0.0, 0.2, 1.0, 0.0,
 						-0.7, -0.99, 0.0, -0.2, -0.8, 0.0, -0.8, -0.1, 0,0};
 
+	float vert[] = { -0.8, 0.6, 0.0, -0.5, 0.95, 0.0,	// v0 v1
+					-0.55, 0.4, 0.0, 0.2, 0.7, 0.0,	// v2 v3
+					-0.1, -0.2, 0.0, 0.2, -0.1, 0.0,	// ...
+					-0.15, -0.8, 0.0, 0.7, -0.7, 0.0 };
+
 	float vertices_2[] = { 0.1, 0.1, 0.0, 0.5, 0.1, 0.0, 0.1, 0.5, 0.0 };
 
-	int indexes[] = { 0, 1, 2, 0, 1, 3};
+	float colors[] = { 1.0, 1.0, 0.0, 1.0,
+					1.0, 0.0, 0.0, 1.0,
+					1.0, 0.2, 0.5, 1.0,
+					0.8, 0.2, 0.8, 1.0,
+					0.2, 0.3, 1.0, 1.0,
+					0.0, 0.7, 0.8, 1.0,
+					0.0, 0.4, 0.4, 1.0,
+					0.0, 1.0, 0.3, 1.0 };
+
+	int indexes[] = { 0, 2, 1, 1, 2, 3, 2, 4, 3, 3, 4, 5, 4, 6, 5, 5, 6, 7};
 
 	// Call VAO-function
-	unsigned int arrayId = createVertexArrayObject(vertices, sizeof(vertices) / sizeof(*vertices), indexes, sizeof(indexes) / sizeof(*indexes));
+	unsigned int arrayId = createVertexArrayObject(vert, sizeof(vert) / sizeof(*vert), indexes, sizeof(indexes) / sizeof(*indexes), colors, sizeof(colors)/sizeof(*colors));
 
 	// Create SHADERS
 
 	Gloom::Shader shader;
 	// These paths ain't pretty at all but we couldn't find the root of this project and desperate times calls for desperate measures..
-	shader.attach("c:/users/alice/documents/github/tdt4195-gvb/graphics1/gloom/gloom/shaders/in.vert");
-	shader.attach("c:/users/alice/documents/github/tdt4195-gvb/graphics1/gloom/gloom/shaders/pink.frag");
+	shader.attach("c:/users/alice/documents/github/tdt4195-gvb/graphics1/gloom/gloom/shaders/simple.vert");
+	shader.attach("c:/users/alice/documents/github/tdt4195-gvb/graphics1/gloom/gloom/shaders/simple.frag");
 	shader.link();
 
 
@@ -53,7 +67,7 @@ void runProgram(GLFWwindow* window)
 		shader.activate();
 
 		// Draw your scene here
-		glDrawElements(GL_TRIANGLES, 15, GL_UNSIGNED_INT, 0);
+		glDrawElements(GL_TRIANGLES, 21, GL_UNSIGNED_INT, 0);
 
 		// Deactivate the shader
 		shader.deactivate();
@@ -80,7 +94,7 @@ void keyboardCallback(GLFWwindow* window, int key, int scancode,
 }
 
 
-unsigned int createVertexArrayObject(float* vertexCoordinates, unsigned int lengthVertices, int* indices, unsigned int lengthIndices) {
+unsigned int createVertexArrayObject(float* vertexCoordinates, unsigned int lengthVertices, int* indices, unsigned int lengthIndices, float* colors, unsigned int lengthColors) {
 	/* VertexCoordinates is assumed to contain coordinates for a triangle on the form (x, y, z). */
 
 	// Create a VAO, with ID stored in arrayId and bind it
@@ -89,9 +103,9 @@ unsigned int createVertexArrayObject(float* vertexCoordinates, unsigned int leng
 	glBindVertexArray(arrayId);
 
 	// Create a buffer with ID stored in bufferId and bind it
-	unsigned int bufferId = 0;
-	glGenBuffers(1, &bufferId);
-	glBindBuffer(GL_ARRAY_BUFFER, bufferId);
+	unsigned int coordBufferId = 0;
+	glGenBuffers(1, &coordBufferId);
+	glBindBuffer(GL_ARRAY_BUFFER, coordBufferId);
 
 	// Give the buffer some data
 	glBufferData(GL_ARRAY_BUFFER, lengthVertices * sizeof(float), vertexCoordinates, GL_STATIC_DRAW);
@@ -99,6 +113,18 @@ unsigned int createVertexArrayObject(float* vertexCoordinates, unsigned int leng
 	// Define how the data is structured
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 12, 0);
 	glEnableVertexAttribArray(0);
+
+	// Creating and binding the color-buffer
+	unsigned int colorsBufferId = 0;
+	glGenBuffers(1, &colorsBufferId);
+	glBindBuffer(GL_ARRAY_BUFFER, colorsBufferId);
+
+	// Give the color-buffer its data
+	glBufferData(GL_ARRAY_BUFFER, lengthColors * sizeof(float), colors, GL_STATIC_DRAW);
+
+	// Define attribute pointers. The color-buffer has index 1 (location=1).
+	glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, 4 * sizeof(float), 0);
+	glEnableVertexAttribArray(1);
 
 	// Create and bind an index buffer
 	unsigned int indexBuffer = 0;
