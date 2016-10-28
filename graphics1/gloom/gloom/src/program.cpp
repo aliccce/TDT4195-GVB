@@ -49,16 +49,17 @@ void runProgram(GLFWwindow* window)
 						0.4, 0.3, 0.0 };
 
 
-	float pyramid_colors[] = { 0.6, 0.2, 0.3,
-							0.3, 0.2, 0.2,
-							0.4, 0.2, 0.4,
-							1.0, 0.7, 0.2,
-							1.0, 0.9, 0.5,
-							0.6, 0.2, 0.3,
-							0.3, 0.2, 0.2,
-							0.4, 0.2, 0.4,
-							1.0, 0.7, 0.2,
-							1.0, 0.9, 0.5 };
+	float pyramid_colors[] = { 0.6, 0.2, 0.3, 1.0,
+							0.3, 0.1, 0.5, 1.0,
+							0.4, 0.2, 0.4, 1.0,
+							1.0, 0.7, 0.2, 1.0,
+							1.0, 0.9, 0.5, 1.0,
+
+							0.6, 0.1, 0.4, 1.0,
+							0.3, 0.1, 0.5, 1.0,
+							0.6, 0.2, 0.3, 1.0,
+							1.0, 0.7, 0.2, 1.0,
+							1.0, 0.9, 0.5, 1.0 };
 
 
 	int pyramid_indices[] = { 0, 1, 4,
@@ -174,6 +175,8 @@ void keyboardCallback(GLFWwindow* window, int key, int scancode,
 		This is done by translating the camera to origo, rotating the camera about the x-axis, and then translating the camera back to it's position. 
 		It is not actually the camera that is moved or rotated, but the elements - they are moved the same relative distance as would be needed to move the camera to
 		origo, then rotated about the camera (origo), and then they are moved back again.
+
+		It is rotated about the x-axis, which is a bit weird if your looking towards the right or the left - you will somehow spin instead.
 		*/
 		matrix *= rotate(-rotate_angle, 1.0, 0.0, 0.0);
 	}
