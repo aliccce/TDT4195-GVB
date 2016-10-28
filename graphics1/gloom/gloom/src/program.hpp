@@ -22,7 +22,7 @@ void keyboardCallback(GLFWwindow* window, int key, int scancode,
 // VAO-generator function
 unsigned int createVertexArrayObject(float* vertexCoordinates, unsigned int lengthVertices, int* indices, unsigned int lengthIndices, float* colors, unsigned int lengthColors);
 
-// Translation functions
+// Transforming functions
 glm::mat4x4 translate(float x, float y, float z);
 glm::mat4x4 rotate(float angle, float x, float y, float z);
 
