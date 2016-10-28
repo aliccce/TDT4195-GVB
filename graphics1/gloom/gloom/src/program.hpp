@@ -20,6 +20,8 @@ void keyboardCallback(GLFWwindow* window, int key, int scancode,
 // VAO-generator function
 unsigned int createVertexArrayObject(float* vertexCoordinates, unsigned int lengthVertices, int* indices, unsigned int lengthIndices, float* colors, unsigned int lengthColors);
 
+// Translation functions
+glm::mat4x4 translate(float x, float y, float z);
 
 // Checks for whether an OpenGL error occurred. If one did,
 // it prints out the error type and ID
