@@ -12,15 +12,12 @@
 glm::mat4x4 matrix(1); 
 
 // Camera location
-float x = 0.0;
-float y = 0.0;
-float z = 1.0;
-
-float size_x = 1.0;
-float size_y = 1.0;
+float camera_x = 0.0;
+float camera_y = 0.0;
+float camera_z = 1.0;
 
 float move_step = 0.1;
-float scale = 0.1;
+float rotate_angle = 0.1;
 
 void runProgram(GLFWwindow* window)
 {
@@ -135,39 +132,39 @@ void keyboardCallback(GLFWwindow* window, int key, int scancode,
 		/* Moving camera to the right
 		This is done by moving the elements left, and updating camera coordinates */
 		matrix *= translate(-move_step, 0.0, 0.0);
-		x += move_step;
+		camera_x += move_step;
 	}
 	else if (key == GLFW_KEY_LEFT && action == GLFW_PRESS)
 	{
 		/* Moving camera to the left (by moving elements to the right) */
 		matrix *= translate(move_step, 0.0, 0.0);
-		x -= move_step;
+		camera_x -= move_step;
 	}
 	else if (key == GLFW_KEY_UP && action == GLFW_PRESS)
 	{
 		/* Move camera forward in z-direction */
 		matrix *= translate(0.0, 0.0, move_step);
-		z -= move_step;
+		camera_z -= move_step;
 
 	}
 	else if (key == GLFW_KEY_DOWN && action == GLFW_PRESS)
 	{
 		/* Move camera backward in z-direction */
 		matrix *= translate(0.0, 0.0, -move_step);
-		z += move_step;
+		camera_z += move_step;
 	}
 	else if (key == GLFW_KEY_J && action == GLFW_PRESS)
 	{
 		/* Move camera up ("fly up") in y-direction */
 		matrix *= translate(0.0, -move_step, 0.0);
-		y += move_step;
+		camera_y += move_step;
 
 	}
 	else if (key == GLFW_KEY_K && action == GLFW_PRESS)
 	{
 		/* Move camera down ("fly down") in y-direction */
 		matrix *= translate(0.0, move_step, 0.0);
-		y -= move_step;
+		camera_y -= move_step;
 
 	}
 	else if (key == GLFW_KEY_W && action == GLFW_PRESS)
@@ -178,31 +175,35 @@ void keyboardCallback(GLFWwindow* window, int key, int scancode,
 		It is not actually the camera that is moved or rotated, but the elements - they are moved the same relative distance as would be needed to move the camera to
 		origo, then rotated about the camera (origo), and then they are moved back again.
 		*/
-		matrix *= ((glm::mat4x4) glm::translate(glm::vec3(0.0, 0.0, 1.0)) * (glm::mat4x4) glm::rotate(-0.05f, glm::vec3(1.0, 0.0, 0)) * (glm::mat4x4) glm::translate(glm::vec3(0.0, 0.0, -1.0)));
-
+		matrix *= rotate(-rotate_angle, 1.0, 0.0, 0.0);
 	}
 	else if (key == GLFW_KEY_S && action == GLFW_PRESS)
 	{
 		/* Look down - see loop up */
-		matrix *= ((glm::mat4x4) glm::translate(glm::vec3(0.0, 0.0, 1.0)) * (glm::mat4x4) glm::rotate(0.05f, glm::vec3(1.0, 0.0, 0)) * (glm::mat4x4) glm::translate(glm::vec3(0.0, 0.0, -1.0)));
+		matrix *= rotate(rotate_angle, 1.0, 0.0, 0.0);
 	}
 
 	else if (key == GLFW_KEY_A && action == GLFW_PRESS)
 	{
 		/* Look left - this is done the way as with look up and  look down, except it's rotated about the y-axis. */
-		matrix *= ((glm::mat4x4) glm::translate(glm::vec3(x, y, z)) * (glm::mat4x4) glm::rotate(-0.05f, glm::vec3(0.0, 1.0, 0)) * (glm::mat4x4) glm::translate(glm::vec3(-x, -y, -z)));
-
+		matrix *= rotate(-rotate_angle, 0.0, 1.0, 0.0);
 	}
 	else if (key == GLFW_KEY_D && action == GLFW_PRESS)
 	{
 		/* Look right - See look left */
-		matrix *= ((glm::mat4x4) glm::translate(glm::vec3(x, y, z)) * (glm::mat4x4) glm::rotate(0.05f, glm::vec3(0.0, 1.0, 0)) * (glm::mat4x4) glm::translate(glm::vec3(-x, -y, -z)));
+		matrix *= rotate(rotate_angle, 0.0, 1.0, 0.0);
 	}
 }
 
 glm::mat4x4 translate(float x, float y, float z)
 {
 	return (glm::mat4x4) glm::translate(glm::vec3(x, y, z));
+}
+
+
+glm::mat4x4 rotate(float angle, float x, float y, float z)
+{
+	return translate(camera_x, camera_y, camera_z) * (glm::mat4x4) glm::rotate(angle, glm::vec3(x, y, z)) * translate(-camera_x, -camera_y, -camera_z);
 }
 
 unsigned int createVertexArrayObject(float* vertexCoordinates, unsigned int lengthVertices, int* indices, unsigned int lengthIndices, float* colors, unsigned int lengthColors) {

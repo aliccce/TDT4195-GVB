@@ -7,6 +7,8 @@
 #include <GLFW/glfw3.h>
 #include <glad/glad.h>
 #include <string>
+#include <glm/mat4x4.hpp>
+
 
 
 // Main OpenGL program
@@ -22,6 +24,8 @@ unsigned int createVertexArrayObject(float* vertexCoordinates, unsigned int leng
 
 // Translation functions
 glm::mat4x4 translate(float x, float y, float z);
+glm::mat4x4 rotate(float angle, float x, float y, float z);
+
 
 // Checks for whether an OpenGL error occurred. If one did,
 // it prints out the error type and ID
