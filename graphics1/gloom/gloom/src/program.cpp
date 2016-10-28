@@ -2,7 +2,25 @@
 #include "program.hpp"
 #include "gloom/gloom.hpp"
 #include "gloom/shader.hpp"
+#include <glm/mat4x4.hpp>
+#include <glm/gtc/type_ptr.hpp> 
+#include <glm/gtx/transform.hpp> 
+#include <glm/vec3.hpp> 
+#include <glm/gtc/matrix_transform.hpp> 
 
+// Uniform matrix
+glm::mat4x4 matrix(1); 
+
+// Camera location
+float x = 0.0;
+float y = 0.0;
+float z = 1.0;
+
+float size_x = 1.0;
+float size_y = 1.0;
+
+float move_step = 0.1;
+float scale = 0.1;
 
 void runProgram(GLFWwindow* window)
 {
@@ -21,44 +39,55 @@ void runProgram(GLFWwindow* window)
 
 	// Set up your scene here (create Vertex Array Objects, etc.)
 
-	float vertices[] = { -0.3, -0.5, 0.0, 0.3, -0.5, 0.0, 0.0, 0.5, 0.0,
-						-0.7, 0.95, 0.0, -0.8, 0.4, 0.0, -0.3, 0.9, 0.0,
-						0.3, -0.05, 0.0, 0.5, -0.07, 0.0, 0.5, 0.4, 0.0,
-						0.15, 0.8, 0.0, 0.3, 0.85, 0.0, 0.2, 1.0, 0.0,
-						-0.7, -0.99, 0.0, -0.2, -0.8, 0.0, -0.8, -0.1, 0,0};
+	float pyramid[] = { 0.0, -0.3, -0.3,		// back pyramid
+						0.0, -0.3, -0.9,
+						-0.6, -0.3, -0.9,
+						-0.6, -0.3, -0.3,
+						-0.3, 0.3, -0.6,
 
-	float vert[] = { 0.0, 0.8, 0.0, -0.2, 0.4, 0.0,	// v0 v1
-					0.2, 0.4, 0.0, -0.4, 0.0, 0.0,	// v2 v3
-					0.0, 0.0, 0.0, 0.4, 0.0, 0.0,	// v4 v5
-					-0.6, -0.4, 0.0, -0.2, -0.4, 0.0, // v6 v7
-					0.2, -0.4, 0.0, 0.6, -0.4, 0.0 }; // v8 v9
+						0.7, -0.3, 0.3,		// front pyramid
+						0.7, -0.3, -0.3,
+						0.1, -0.3, -0.3,
+						0.1, -0.3, 0.3,
+						0.4, 0.3, 0.0 };
 
-	float vertices_2[] = { 0.1, 0.1, 0.0, 0.5, 0.1, 0.0, 0.1, 0.5, 0.0 };
 
-	float colors[] = { 1.0, 0.0, 0.0, 1.0, 
-					1.0, 0.5, 0.0, 1.0,
-					1.0, 0.0, 0.5, 1.0,
-					1.0, 1.0, 0.0, 1.0,
-					0.5, 0.5, 0.5, 1.0,
-					0.5, 0.0, 1.0, 1.0,
-					0.0, 1.0, 0.0, 1.0,
-					0.0, 1.0, 0.5, 1.0,
-					0.0, 0.5, 1.0, 1.0,
-					0.0, 0.0, 1.0, 1.0 };
+	float pyramid_colors[] = { 0.6, 0.2, 0.3,
+							0.3, 0.2, 0.2,
+							0.4, 0.2, 0.4,
+							1.0, 0.7, 0.2,
+							1.0, 0.9, 0.5,
+							0.6, 0.2, 0.3,
+							0.3, 0.2, 0.2,
+							0.4, 0.2, 0.4,
+							1.0, 0.7, 0.2,
+							1.0, 0.9, 0.5 };
 
-	int indexes[] = { 0, 1, 2, 1, 3, 4, 2, 4, 5, 3, 6, 7, 4, 7, 8, 5, 8, 9};
+
+	int pyramid_indices[] = { 0, 1, 4,
+							1, 2, 4,
+							2, 3, 4,
+							3, 0, 4,
+
+							5, 6, 9,
+							6, 7, 9,
+							7, 8, 9,
+							8, 5, 9};
 
 	// Call VAO-function
-	unsigned int arrayId = createVertexArrayObject(vert, sizeof(vert) / sizeof(*vert), indexes, sizeof(indexes) / sizeof(*indexes), colors, sizeof(colors)/sizeof(*colors));
+	unsigned int arrayId = createVertexArrayObject(pyramid, sizeof(pyramid) / sizeof(*pyramid), pyramid_indices, sizeof(pyramid_indices) / sizeof(*pyramid_indices), pyramid_colors, sizeof(pyramid_colors)/sizeof(*pyramid_colors));
 
 	// Create SHADERS
-
 	Gloom::Shader shader;
 	// These paths ain't pretty at all but we couldn't find the root of this project and desperate times calls for desperate measures..
 	shader.attach("c:/users/alice/documents/github/tdt4195-gvb/graphics1/gloom/gloom/shaders/simple.vert");
 	shader.attach("c:/users/alice/documents/github/tdt4195-gvb/graphics1/gloom/gloom/shaders/simple.frag");
 	shader.link();
 
+	shader.activate();
+	matrix *= (glm::mat4x4) glm::perspective(45.0f, (float)windowWidth / (float)windowHeight, 0.01f, 100.0f);
+	matrix *= (glm::mat4x4) glm::lookAt(glm::vec3(0.0, 0.0, 1.0), glm::vec3(0.0, 0.0, 0.0), glm::vec3(0.0, 1.0, 0.0));
+	
 
 	// Rendering Loop
 	while (!glfwWindowShouldClose(window))
@@ -69,8 +98,14 @@ void runProgram(GLFWwindow* window)
 		// Activate the shader
 		shader.activate();
 
-		// Draw your scene here
-		glDrawElements(GL_TRIANGLES, 21, GL_UNSIGNED_INT, 0);
+		// Creating uniforms
+		// Creating a glm identity matrix
+		
+		glUniformMatrix4fv(2, 1, GL_FALSE, glm::value_ptr(matrix));
+
+		// Bind and draw VAO
+		glBindVertexArray(arrayId);
+		glDrawElements(GL_TRIANGLES, 90, GL_UNSIGNED_INT, 0);
 
 		// Deactivate the shader
 		shader.deactivate();
@@ -88,14 +123,87 @@ void runProgram(GLFWwindow* window)
 
 void keyboardCallback(GLFWwindow* window, int key, int scancode,
 	int action, int mods)
+	
 {
 	// Use escape key for terminating the GLFW window
 	if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
 	{
 		glfwSetWindowShouldClose(window, GL_TRUE);
+	} 
+	else if (key == GLFW_KEY_RIGHT && action == GLFW_PRESS)
+	{
+		/* Moving camera to the right
+		This is done by moving the elements left, and updating camera coordinates */
+		matrix *= translate(-move_step, 0.0, 0.0);
+		x += move_step;
+	}
+	else if (key == GLFW_KEY_LEFT && action == GLFW_PRESS)
+	{
+		/* Moving camera to the left (by moving elements to the right) */
+		matrix *= translate(move_step, 0.0, 0.0);
+		x -= move_step;
+	}
+	else if (key == GLFW_KEY_UP && action == GLFW_PRESS)
+	{
+		/* Move camera forward in z-direction */
+		matrix *= translate(0.0, 0.0, move_step);
+		z -= move_step;
+
+	}
+	else if (key == GLFW_KEY_DOWN && action == GLFW_PRESS)
+	{
+		/* Move camera backward in z-direction */
+		matrix *= translate(0.0, 0.0, -move_step);
+		z += move_step;
+	}
+	else if (key == GLFW_KEY_J && action == GLFW_PRESS)
+	{
+		/* Move camera up ("fly up") in y-direction */
+		matrix *= translate(0.0, -move_step, 0.0);
+		y += move_step;
+
+	}
+	else if (key == GLFW_KEY_K && action == GLFW_PRESS)
+	{
+		/* Move camera down ("fly down") in y-direction */
+		matrix *= translate(0.0, move_step, 0.0);
+		y -= move_step;
+
+	}
+	else if (key == GLFW_KEY_W && action == GLFW_PRESS)
+	{
+		/* Look up 
+		
+		This is done by translating the camera to origo, rotating the camera about the x-axis, and then translating the camera back to it's position. 
+		It is not actually the camera that is moved or rotated, but the elements - they are moved the same relative distance as would be needed to move the camera to
+		origo, then rotated about the camera (origo), and then they are moved back again.
+		*/
+		matrix *= ((glm::mat4x4) glm::translate(glm::vec3(0.0, 0.0, 1.0)) * (glm::mat4x4) glm::rotate(-0.05f, glm::vec3(1.0, 0.0, 0)) * (glm::mat4x4) glm::translate(glm::vec3(0.0, 0.0, -1.0)));
+
+	}
+	else if (key == GLFW_KEY_S && action == GLFW_PRESS)
+	{
+		/* Look down - see loop up */
+		matrix *= ((glm::mat4x4) glm::translate(glm::vec3(0.0, 0.0, 1.0)) * (glm::mat4x4) glm::rotate(0.05f, glm::vec3(1.0, 0.0, 0)) * (glm::mat4x4) glm::translate(glm::vec3(0.0, 0.0, -1.0)));
+	}
+
+	else if (key == GLFW_KEY_A && action == GLFW_PRESS)
+	{
+		/* Look left - this is done the way as with look up and  look down, except it's rotated about the y-axis. */
+		matrix *= ((glm::mat4x4) glm::translate(glm::vec3(x, y, z)) * (glm::mat4x4) glm::rotate(-0.05f, glm::vec3(0.0, 1.0, 0)) * (glm::mat4x4) glm::translate(glm::vec3(-x, -y, -z)));
+
+	}
+	else if (key == GLFW_KEY_D && action == GLFW_PRESS)
+	{
+		/* Look right - See look left */
+		matrix *= ((glm::mat4x4) glm::translate(glm::vec3(x, y, z)) * (glm::mat4x4) glm::rotate(0.05f, glm::vec3(0.0, 1.0, 0)) * (glm::mat4x4) glm::translate(glm::vec3(-x, -y, -z)));
 	}
 }
 
+glm::mat4x4 translate(float x, float y, float z)
+{
+	return (glm::mat4x4) glm::translate(glm::vec3(x, y, z));
+}
 
 unsigned int createVertexArrayObject(float* vertexCoordinates, unsigned int lengthVertices, int* indices, unsigned int lengthIndices, float* colors, unsigned int lengthColors) {
 	/* VertexCoordinates is assumed to contain coordinates for a triangle on the form (x, y, z). */
