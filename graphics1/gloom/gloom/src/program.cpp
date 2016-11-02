@@ -7,6 +7,7 @@
 #include <glm/gtx/transform.hpp> 
 #include <glm/vec3.hpp> 
 #include <glm/gtc/matrix_transform.hpp> 
+#include "PATH.hpp"
 
 // Uniform matrix
 glm::mat4x4 matrix(1); 
@@ -78,8 +79,8 @@ void runProgram(GLFWwindow* window)
 	// Create SHADERS
 	Gloom::Shader shader;
 	// These paths ain't pretty at all but we couldn't find the root of this project and desperate times calls for desperate measures..
-	shader.attach("c:/users/alice/documents/github/tdt4195-gvb/graphics1/gloom/gloom/shaders/simple.vert");
-	shader.attach("c:/users/alice/documents/github/tdt4195-gvb/graphics1/gloom/gloom/shaders/simple.frag");
+	shader.attach(SIMPLE_VERT);
+	shader.attach(SIMPLE_FRAG);
 	shader.link();
 
 	shader.activate();
