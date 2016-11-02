@@ -1,4 +1,16 @@
+
+#include <iostream>
+#include "gloom/gloom.hpp"
+#include "gloom/shader.hpp"
+#include <glm/mat4x4.hpp>
+#include <glm/gtc/type_ptr.hpp> 
+#include <glm/gtx/transform.hpp> 
+#include <glm/vec3.hpp> 
+#include <glm/gtc/matrix_transform.hpp> 
+#include "PATH.hpp"
 #include "sphere.hpp"
+
+using namespace std;
 
 // Creates a VAO containing a sphere with a resolution specified by slices and layers, with a radius of 1.
 
@@ -106,14 +118,63 @@ unsigned int createCircleVAO(unsigned int slices, unsigned int layers) {
 		}
 	}
 
+	cout << *vertices;
+
 	// Sending the created buffers over to OpenGL.
 	// Don't forget to modify this to fit the function you created yourself!
 	// You will have to include a file which contains the implementation of this function for this to work.
-	unsigned int vao_id = generateVertexArray(vertices, indices, triangleCount);
+	const unsigned int num_of_colors = triangleCount * 4;
+	float colors[200] = {0.0};
+
+	unsigned int vao_id = createVertexArrayObject(vertices, sizeof(vertices) / sizeof(*vertices), indices, sizeof(indices) / sizeof(*indices), colors, 1);
 
 	// Cleaning up after ourselves
 	delete[] vertices;
 	delete[] indices;
+	
 
 	return vao_id;
+}
+
+unsigned int createVertexArrayObject(float* vertexCoordinates, unsigned int lengthVertices, unsigned int* indices, unsigned int lengthIndices, float* colors, unsigned int lengthColors) {
+	/* VertexCoordinates is assumed to contain coordinates for a triangle on the form (x, y, z). */
+
+	// Create a VAO, with ID stored in arrayId and bind it
+	unsigned int arrayId = 0;
+	glGenVertexArrays(1, &arrayId);
+	glBindVertexArray(arrayId);
+
+	// Create a buffer with ID stored in bufferId and bind it
+	unsigned int coordBufferId = 0;
+	glGenBuffers(1, &coordBufferId);
+	glBindBuffer(GL_ARRAY_BUFFER, coordBufferId);
+
+	// Give the buffer some data
+	glBufferData(GL_ARRAY_BUFFER, lengthVertices * sizeof(float), vertexCoordinates, GL_STATIC_DRAW);
+
+	// Define how the data is structured
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 12, 0);
+	glEnableVertexAttribArray(0);
+
+	// Creating and binding the color-buffer
+	unsigned int colorsBufferId = 0;
+	glGenBuffers(1, &colorsBufferId);
+	glBindBuffer(GL_ARRAY_BUFFER, colorsBufferId);
+
+	// Give the color-buffer its data
+	glBufferData(GL_ARRAY_BUFFER, lengthColors * sizeof(float), colors, GL_STATIC_DRAW);
+
+	// Define attribute pointers. The color-buffer has index 1 (location=1).
+	glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, 4 * sizeof(float), 0);
+	glEnableVertexAttribArray(1);
+
+	// Create and bind an index buffer
+	unsigned int indexBuffer = 0;
+	glGenBuffers(1, &indexBuffer);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indexBuffer);
+
+	// Give the index buffer some data
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, lengthIndices * sizeof(unsigned int), indices, GL_STATIC_DRAW);
+
+	return arrayId;
 }

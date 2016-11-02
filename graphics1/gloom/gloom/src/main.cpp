@@ -1,6 +1,7 @@
 // Local headers
 #include "gloom/gloom.hpp"
 #include "program.hpp"
+#include "sphere.hpp"
 
 // System headers
 #include <glad/glad.h>

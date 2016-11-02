@@ -7,6 +7,8 @@
 #include <glm/gtx/transform.hpp> 
 #include <glm/vec3.hpp> 
 #include <glm/gtc/matrix_transform.hpp> 
+#include "PATH.hpp"
+#include "sphere.hpp"
 
 // Uniform matrix
 glm::mat4x4 matrix(1); 
@@ -73,19 +75,22 @@ void runProgram(GLFWwindow* window)
 							8, 5, 9};
 
 	// Call VAO-function
-	unsigned int arrayId = createVertexArrayObject(pyramid, sizeof(pyramid) / sizeof(*pyramid), pyramid_indices, sizeof(pyramid_indices) / sizeof(*pyramid_indices), pyramid_colors, sizeof(pyramid_colors)/sizeof(*pyramid_colors));
+	//unsigned int arrayId = createVertexArrayObject(pyramid, sizeof(pyramid) / sizeof(*pyramid), pyramid_indices, sizeof(pyramid_indices) / sizeof(*pyramid_indices), pyramid_colors, sizeof(pyramid_colors)/sizeof(*pyramid_colors));
+	unsigned int arrayId = createCircleVAO(5, 5);
 
 	// Create SHADERS
 	Gloom::Shader shader;
 	// These paths ain't pretty at all but we couldn't find the root of this project and desperate times calls for desperate measures..
-	shader.attach("c:/users/alice/documents/github/tdt4195-gvb/graphics1/gloom/gloom/shaders/simple.vert");
-	shader.attach("c:/users/alice/documents/github/tdt4195-gvb/graphics1/gloom/gloom/shaders/simple.frag");
+	shader.attach(SIMPLE_VERT);
+	shader.attach(SIMPLE_FRAG);
+
 	shader.link();
 
+	/*
 	shader.activate();
 	matrix *= (glm::mat4x4) glm::perspective(45.0f, (float)windowWidth / (float)windowHeight, 0.01f, 100.0f);
 	matrix *= (glm::mat4x4) glm::lookAt(glm::vec3(0.0, 0.0, 1.0), glm::vec3(0.0, 0.0, 0.0), glm::vec3(0.0, 1.0, 0.0));
-	
+	*/
 
 	// Rendering Loop
 	while (!glfwWindowShouldClose(window))
@@ -103,7 +108,7 @@ void runProgram(GLFWwindow* window)
 
 		// Bind and draw VAO
 		glBindVertexArray(arrayId);
-		glDrawElements(GL_TRIANGLES, 90, GL_UNSIGNED_INT, 0);
+		glDrawElements(GL_TRIANGLES, 300, GL_UNSIGNED_INT, 0);
 
 		// Deactivate the shader
 		shader.deactivate();
