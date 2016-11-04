@@ -1,14 +1,8 @@
 
 #include <iostream>
-#include "gloom/gloom.hpp"
-#include "gloom/shader.hpp"
-#include <glm/mat4x4.hpp>
-#include <glm/gtc/type_ptr.hpp> 
-#include <glm/gtx/transform.hpp> 
-#include <glm/vec3.hpp> 
-#include <glm/gtc/matrix_transform.hpp> 
 #include "PATH.hpp"
 #include "sphere.hpp"
+#include "colors.cpp"
 
 using namespace std;
 
@@ -118,21 +112,21 @@ unsigned int createCircleVAO(unsigned int slices, unsigned int layers) {
 		}
 	}
 
-	cout << *vertices;
 
 	// Sending the created buffers over to OpenGL.
 	// Don't forget to modify this to fit the function you created yourself!
 	// You will have to include a file which contains the implementation of this function for this to work.
-	const unsigned int num_of_colors = triangleCount * 4;
-	float colors[200] = {0.0};
 
-	unsigned int vao_id = createVertexArrayObject(vertices, sizeof(vertices) / sizeof(*vertices), indices, sizeof(indices) / sizeof(*indices), colors, 1);
+	float* colors = generateColorArray(triangleCount * 3, 0.9f, 0.3f, 0.2f, 0.2f);
+
+
+
+	unsigned int vao_id = createVertexArrayObject(vertices, triangleCount * 3 * 3, indices, triangleCount * 3, colors, triangleCount * 3 * 4);
 
 	// Cleaning up after ourselves
 	delete[] vertices;
 	delete[] indices;
 	
-
 	return vao_id;
 }
 
