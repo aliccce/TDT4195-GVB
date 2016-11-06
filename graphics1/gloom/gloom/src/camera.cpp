@@ -5,16 +5,6 @@
 using namespace std;
 
 
-glm::mat4x4 Camera::move(float x, float y, float z)
-{
-	/*	1. Camera is rotated about y-axis so that it points parallell with x-axis
-		2. Then it is moved along one of the axes
-		3. Finally it is rotated back the way it was */
-
-	return rotate(rotate_count * -rotate_angle, 0.0, 1.0, 0.0) * translate(x, y, z) * rotate(rotate_count * rotate_angle, 0.0, 1.0, 0.0);
-}
-
-
 glm::mat4x4 Camera::translate(float x, float y, float z)
 {
 	return (glm::mat4x4) glm::translate(glm::vec3(x, y, z));
@@ -34,7 +24,7 @@ glm::mat4x4 Camera::moveRight() {
 	z += z_move;
 	x += x_move;
 
-	return move(-move_step, 0.0, 0.0);
+	return translate(-x_move, 0.0, -z_move);
 }
 
 glm::mat4x4 Camera::moveLeft() {
@@ -44,7 +34,7 @@ glm::mat4x4 Camera::moveLeft() {
 	z -= z_move;
 	x -= x_move;
 
-	return move(move_step, 0.0, 0.0);
+	return translate(x_move, 0.0, z_move);
 }
 
 glm::mat4x4 Camera::moveForward() {
@@ -54,7 +44,7 @@ glm::mat4x4 Camera::moveForward() {
 	z -= z_move;
 	x += x_move;
 
-	return move(0.0, 0.0, move_step);
+	return translate(-x_move, 0.0, z_move);
 }
 
 glm::mat4x4 Camera::moveBackward() {
@@ -64,7 +54,7 @@ glm::mat4x4 Camera::moveBackward() {
 	z += z_move;
 	x -= x_move;
 
-	return move(0.0, 0.0, -move_step);
+	return translate(x_move, 0.0, -z_move);
 }
 
 glm::mat4x4 Camera::moveUp() {

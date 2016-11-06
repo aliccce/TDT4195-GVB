@@ -18,7 +18,6 @@ class Camera
 
 	glm::mat4x4 translate(float x, float y, float z);
 	glm::mat4x4 rotate(float angle, float x, float y, float z);
-	glm::mat4x4 move(float x, float y, float z);
 
 
 public:
