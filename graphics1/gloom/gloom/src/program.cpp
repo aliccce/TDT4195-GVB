@@ -9,8 +9,7 @@
 #include <glm/gtc/matrix_transform.hpp> 
 #include "PATH.hpp"
 #include "camera.cpp"
-#include "vao.cpp"
-#include "sphere.hpp"
+#include "sphere.cpp"
 
 // Create camera-object
 Camera camera = Camera(0.1f, 0.1f);
@@ -73,9 +72,9 @@ void runProgram(GLFWwindow* window)
 							8, 5, 9};
 
 	// Create sphere, and get its VAO-id
-	unsigned int arrayId = createVertexArrayObject(pyramid, 30, pyramid_indices, 24, pyramid_colors, 40);
+	//unsigned int arrayId = createVertexArrayObject(pyramid, 30, pyramid_indices, 24, pyramid_colors, 40);
 
-	//unsigned int arrayId = createCircleVAO(10, 5);
+	unsigned int arrayId = createCircleVAO(10, 5);
 
 
 	// Create SHADERS
@@ -88,9 +87,10 @@ void runProgram(GLFWwindow* window)
 
 	
 	shader.activate();
-	matrix *= (glm::mat4x4) glm::perspective(45.0f, (float)windowWidth / (float)windowHeight, 0.01f, 100.0f);
-	matrix *= (glm::mat4x4) glm::lookAt(glm::vec3(0.0, 0.0, 1.0), glm::vec3(0.0, 0.0, 0.0), glm::vec3(0.0, 1.0, 0.0));
 	
+	matrix *= (glm::mat4x4) glm::perspective(45.0f, (float)windowWidth / (float)windowHeight, 0.01f, 100.0f);
+	
+	matrix *= (glm::mat4x4) glm::scale(glm::vec3(0.5, 0.5, 0.5));
 
 	// Rendering Loop
 	while (!glfwWindowShouldClose(window))
@@ -104,6 +104,8 @@ void runProgram(GLFWwindow* window)
 		// Creating uniforms
 		// Creating a glm identity matrix
 		
+		//matrix *= (glm::mat4x4) glm::lookAt(glm::vec3(0.0, 0.0, 1.0), glm::vec3(0.0, 0.0, 0.0), glm::vec3(0.0, 1.0, 0.0));
+
 		glUniformMatrix4fv(2, 1, GL_FALSE, glm::value_ptr(matrix));
 
 		// Bind and draw VAO
