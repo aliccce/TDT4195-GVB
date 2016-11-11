@@ -1,0 +1,16 @@
+row col shape center [color [orientation]]	# Data
+int int int   float   float  float		# Datatype
+              x y     r g b			# Hvis data består av flere deler
+
+
+Eksempel:
+0 0 1 0.0 0.1 0.8 0.9 0.8 1.2
+
+Som basically betyr:
+
+row: 0
+col: 0
+shape: 1
+center: (0.0, 0.1)
+Color: (0.8, 0.9, 0.8)
+orientation 1.2
