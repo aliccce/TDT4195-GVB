@@ -14,3 +14,10 @@ shape: 1
 center: (0.0, 0.1)
 Color: (0.8, 0.9, 0.8)
 orientation 1.2
+
+Litt større eksempel:
+
+0 0 1 0.0 0.1 0.8 0.9 0.8 1.2	# En shape per linje
+2 0 1 0.0 0.1 0.8 0.9 0.8 1.2	# Tom rute -> ingen linjer i fila
+2 1 1 0.0 0.1 0.8 0.9 0.8 1.2
+3 3 1 0.0 0.1 0.8 0.9 0.8 1.2
