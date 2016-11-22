@@ -1,6 +1,7 @@
 #include "shapes.hpp"
 #include <stdio.h>	/* printf */
 #include <string.h>
+#include <stdlib.h> /* malloc */
 #include <math.h>	/* sin, cos, fabs */
 #include <vao.hpp>
 
@@ -68,31 +69,69 @@ unsigned int createPolygon(int n, float r, float g, float b, int quadrants) {
 }
 
 
-unsigned int createTriangle(float r, float g, float b) {
+unsigned int createTriangle(float r, float g, float b) 
+{
+	
+
+	/* Num of components for shape and extruded stuff */
+	
+	const int SHAPE_COMPONENTS = 3 * THREE_VALUES;
+	const int SHAPE_INDICES = TRIANGLE;
+	const int EXTRUDE_COMPONENTS = 2 * SHAPE_COMPONENTS;
+	const int EXTRUDE_INDICES = 2 * 3 * TRIANGLE;
+	const int EXTRUDE_OFFSET = 3;
+
+	/*
 	const int NUM_OF_VERTEX_VALUES = 3 * THREE_VALUES;		// Three vertices with three values.
-	const int NUM_OF_INDICES = TRIANGLE;				// One triangle
-
-	float* vertices = new float[NUM_OF_VERTEX_VALUES];
-	float* colors = new float[NUM_OF_VERTEX_VALUES];
-	unsigned int* indices = new unsigned int[NUM_OF_INDICES];
-
+	const int NUM_OF_INDICES = TRIANGLE;	*/			// One triangle
+	
+	float vertices[SHAPE_COMPONENTS + EXTRUDE_COMPONENTS];
+	float colors[SHAPE_COMPONENTS + EXTRUDE_COMPONENTS];
+	unsigned int indices[SHAPE_INDICES + EXTRUDE_INDICES];
+	
+	/**** CALCULATING SHAPES ****/
 	createTriangleVertices(vertices, 1.0);
-	fillColors(colors, NUM_OF_VERTEX_VALUES, r, g, b);
-
-	for (int index = 0; index < NUM_OF_VERTEX_VALUES; index += 3)
+	fillColors(colors, SHAPE_COMPONENTS, r, g, b);
+	
+	for (int index = 0; index < SHAPE_INDICES; index += 1)
 	{
-		indices[index / 3] = index / 3;
+		indices[index] = index;
 	}
+	/*
+	float* extrudeVertices = new float[NUM_OF_VERTEX_VALUES * 2];
+	unsigned int* extrudeIndices = new unsigned int[NUM_OF_VERTEX_VALUES * 2];
+	float* extrudeColors = new float[NUM_OF_VERTEX_VALUES * 2];*/
 
-	unsigned int vao = createVertexArrayObject(vertices, NUM_OF_VERTEX_VALUES, indices, NUM_OF_INDICES, colors, NUM_OF_VERTEX_VALUES);
+	/**** CALCULATING EXTRUTION ****/
+	extrude(vertices + SHAPE_COMPONENTS, EXTRUDE_COMPONENTS, 
+			indices + SHAPE_INDICES, EXTRUDE_INDICES, 
+			vertices, SHAPE_COMPONENTS, 
+			indices, SHAPE_INDICES, 
+			0.1, 0);
+
+	fillColors(colors + SHAPE_COMPONENTS, EXTRUDE_COMPONENTS,
+		(r < SHADE) ? 0 : r - SHADE,
+		(g < SHADE) ? 0 : g - SHADE,
+		(b < SHADE) ? 0 : b - SHADE);
+
+
+	unsigned int vao = createVertexArrayObject(vertices, SHAPE_COMPONENTS + EXTRUDE_COMPONENTS, 
+												indices, SHAPE_INDICES + EXTRUDE_INDICES,
+												colors, SHAPE_COMPONENTS + EXTRUDE_COMPONENTS);
 
 	// Cleanup
-	delete[] vertices;
-	delete[] indices;
-	delete[] colors;
+
+	for (int i = 0; i < SHAPE_COMPONENTS + EXTRUDE_COMPONENTS; i += 3) {
+		printf("(%f, %f, %f)\n", vertices[i], vertices[i + 1], vertices[i + 2]);
+	}
+
+	for (int i = 0; i < SHAPE_INDICES + EXTRUDE_INDICES; i += 3) {
+		printf("triangle %d, %d, %d\n", indices[i], indices[i + 1], indices[i + 2]);
+	}
+
 
 	return vao;
-}
+}    
 
 
 unsigned int createParallellogram(float r, float g, float b, float skew) {
@@ -145,63 +184,45 @@ unsigned int createParallellogram(float r, float g, float b, float skew) {
 
 
 unsigned int createA(float r, float g, float b) {
-	/*
-	float* bigTriangle = new float[TRIANGLE * THREE_VALUES];
-	float* tinyTriangle = new float[TRIANGLE * THREE_VALUES];
+	
+	float* bigTriangle = new float[(size_t) TRIANGLE * THREE_VALUES];
+	float* tinyTriangle = new float[(size_t) TRIANGLE * THREE_VALUES];
 	createTriangleVertices(bigTriangle, 1.0);
-	createTriangleVertices(tinyTriangle, 0.7);*/
+	createTriangleVertices(tinyTriangle, 0.7);
 
-	const int NUM_OF_VERTEX_VALUES = 6 * THREE_VALUES;		// Six vertices with three values.
-	const int NUM_OF_INDICES = 4 * TRIANGLE;
+	const size_t NUM_OF_VERTEX_VALUES = 6 * THREE_VALUES;		// Six vertices with three values.
+	const size_t NUM_OF_INDICES = 4 * TRIANGLE;
 	
-	float vertices[] = { 0.00000, 1.000000, 0.000000, 0.000000, 0.550000, 0.000000, 
-						-0.866025, -0.500000, 0.000000, -0.606218, -0.500000, 0.000000, 
-						0.866026, -0.500000, 0.000000, 0.606218, -0.500000, 0.000000 };
+	float* vertices = new float[NUM_OF_VERTEX_VALUES];
+	float* colors = new float[NUM_OF_VERTEX_VALUES];
+	unsigned int indices[] = { 2, 3, 1, 2, 1, 0, 1, 4, 0, 1, 5, 4 };	// Not dynamic, do not delete this
 
-	float colors[] = { 1.0, 1.0, 0.0, 1.0, 1.0, 0.0, 1.0, 1.0, 0.0,
-		1.0, 1.0, 0.0, 1.0, 1.0, 0.0, 1.0, 1.0, 0.0 };
-
-	unsigned int indices[] = { 2, 3, 1, 2, 1, 0, 1, 4, 0, 1, 5, 4 };
-
-	/*
-	const float distance = fabs(bigTriangle[4] - tinyTriangle[4]);
-	printf("distance %f", distance);
-	moveTriangle(tinyTriangle, distance);
+	/* The tiny triangle is moved down to the same baseline as the big */
+	float distance = fabs(bigTriangle[5] - tinyTriangle[5]);
+	moveTriangle(tinyTriangle, distance);							
 	
-	int index = 0;
-	float x, y, z;
+	size_t index = 0;
 	
-	for (int i = 0; i < TRIANGLE * THREE_VALUES; i += 3)
+	for (size_t i = 0; i < TRIANGLE * THREE_VALUES; i += 3)
 	{
-		memcpy(vertices + index, bigTriangle + i, 3 * sizeof(float));
-
-		printf("%f, %f, %f, ", vertices[index], vertices[index + 1], vertices[index + 2]);
-		
+		memcpy(vertices + index, bigTriangle + i, 3 * sizeof(float));	// Copies 3 floats from bigTriangle[i] to vertices[index]
 		index += 3;
-
-		memcpy(vertices + index, tinyTriangle + i, 3 * sizeof(float));
-		printf("%f, %f, %f, ", vertices[index], vertices[index + 1], vertices[index + 2]);
-
+		memcpy(vertices + index, tinyTriangle + i, 3 * sizeof(float));	
 		index += 3;
 	}
 	
 	delete[] tinyTriangle;
-	delete[] bigTriangle;*/
+	delete[] bigTriangle;	// Done with these
 
-	//fillColors(colors, NUM_OF_VERTEX_VALUES, r, g, b);
-
-	//printf("rgb = %f, %f, %f\n", colors[0], colors[1], colors[2]);
-
+	fillColors(colors, NUM_OF_VERTEX_VALUES, r, g, b);
 
 	unsigned int vao = createVertexArrayObject(vertices, NUM_OF_VERTEX_VALUES, indices, NUM_OF_INDICES, colors, NUM_OF_VERTEX_VALUES);
-	printf("Do we reach this?\n");
 
 	// Cleanup
-	/*  n nn mn 
+	
 	delete[] vertices;
-	delete[] indices;
 	delete[] colors;
-	*/
+	
 	return vao;
 }
 
@@ -238,8 +259,8 @@ unsigned int createStar(float r, float g, float b) {
 			/* Calculating for non-pointing vertices */
 			v_angle += rotate_angle;
 			x = scale * cos(v_angle);
-			y = scale * sin(v_angle);
-			// z doesn't change
+			z = scale * -sin(v_angle);
+			// y doesn't change
 		}
 		else
 		{
@@ -250,8 +271,8 @@ unsigned int createStar(float r, float g, float b) {
 			/* Calculating for non-pointing vertices */
 			point_angle += rotate_angle;
 			x = cos(point_angle);
-			y = sin(point_angle);
-			// z doesn't change
+			z = -sin(point_angle);
+			// y doesn't change
 		}
 	}
 
@@ -285,45 +306,109 @@ unsigned int createStar(float r, float g, float b) {
 	return vao;
 }
 
+void extrude(float bufferVertices[], size_t bvLen, 
+			unsigned int bufferIndices[], size_t biLen,
+			float vertices[], size_t vLen, 
+			unsigned int indices[], size_t iLen, float height, int startOnOne)
+{
+	/* Extrudes an object drawn in xz-plane in y-plane. The object itself is lifted by height. */
+	/* Copying all coordinates in vertices to the buffer */
 
-void moveTriangle(float* triangle, float distance) {
-	/* Triangle is moved along the y axis.
-	Assumnes triangle is an array with 9 values on the form {x0, y0, z0, ... } */
-	for (int i = 1; i < THREE_VALUES * TRIANGLE; i += 3)
+	memcpy(bufferVertices, vertices, vLen * sizeof(float));
+
+	/* Lifting all shapes along y axis with height */
+	for (size_t index = 1; index < vLen; index += 3) 
 	{
-		triangle[i] -= distance;
+		vertices[index] += height;
 	}
 
+	/* Doing another copy of the lifted vertices to the buffer */
+	memcpy(bufferVertices + vLen, vertices, vLen * sizeof(float));
+
+	/* We have all we need, so now we have to add indices to our index buffer
+	(not to mistaken with a VBO index buffer) */
+	unsigned int SHAPE_VERTICES = vLen / 3;		// Number of nodes in shape
+	size_t index;
+	size_t i = SHAPE_VERTICES + startOnOne;
+
+	for (index = 0; index < biLen; index += 6)	/* Calculating two triangles at a time */
+	{
+		if (i == SHAPE_VERTICES * 2 - 1)
+		{
+			/* Lower triangle */
+			bufferIndices[index] = i;
+			bufferIndices[index + 1] = SHAPE_VERTICES + startOnOne;
+			bufferIndices[index + 2] = i + 1;
+
+			printf("Triangle %d, %d, %d\n", bufferIndices[index], bufferIndices[index + 1], bufferIndices[index + 2]);
+
+			/* Upper triangle */
+			bufferIndices[index + 3] = i;
+			bufferIndices[index + 4] = i + 1;
+			bufferIndices[index + 5] = i + SHAPE_VERTICES;
+		} 
+		else
+		{
+			/* Lower triangle */
+			bufferIndices[index] = i;
+			bufferIndices[index + 1] = i + 1;
+			bufferIndices[index + 2] = i + SHAPE_VERTICES + 1;
+
+			printf("Triangle %d, %d, %d\n", bufferIndices[index], bufferIndices[index + 1], bufferIndices[index + 2]);
+
+			/* Upper triangle */
+			bufferIndices[index + 3] = i;
+			bufferIndices[index + 4] = i + SHAPE_VERTICES + 1;
+			bufferIndices[index + 5] = i + SHAPE_VERTICES;
+			
+			printf("Triangle %d, %d, %d\n", bufferIndices[index], bufferIndices[index + 1], bufferIndices[index + 2]);
+		}
+		i += 1;
+	}
 }
 
 
-void createTriangleVertices(float* vertices, float scale) {
+void moveTriangle(float triangle[], float distance) {
+	/* Triangle is moved along the z axis.
+	Assumnes triangle is an array with 9 values on the form {x0, y0, z0, ... } */
+	for (size_t i = 2; i < THREE_VALUES * TRIANGLE; i += 3)
+	{
+		triangle[i] += distance;
+	}
+}
+
+
+void createTriangleVertices(float vertices[], float scale) {
 	/* Vertices must be of size 9! */
-	const int NUM_OF_VERTEX_VALUES = TRIANGLE * THREE_VALUES;		// Three vertices with three values.
+	const size_t NUM_OF_VERTEX_VALUES = TRIANGLE * THREE_VALUES;		// Three vertices with three values.
 
 	float angle = toRadians(90.0);
 	const float rotate_angle = toRadians(120.0);
 	float x = 0.0;
-	float y = scale;
+	float z = -scale;
 
-	for (int index = 0; index < NUM_OF_VERTEX_VALUES; index += 3)
+	for (size_t index = 0; index < NUM_OF_VERTEX_VALUES; index += 3)
 	{
 		vertices[index] = x;
-		vertices[index + 1] = y;
-		vertices[index + 2] = 0.0;
+		vertices[index + 1] = 0.0;
+		vertices[index + 2] = z;
 		angle += rotate_angle;
 		x = scale * cos(angle);
-		y = scale * sin(angle);
+		z = scale * -sin(angle);
 	}
 }
 
 
-void fillColors(float* colors, int length, float r, float g, float b) {
-	for (int index = 0; index < length; index += THREE_VALUES) {
+void fillColors(float colors[], size_t length, float r, float g, float b) {
+	for (size_t index = 0; index < length; index += 3)
+	{	
+		printf("Fill colors: %d / %d\n", index, length);
 		colors[index] = r;
 		colors[index + 1] = g;
 		colors[index + 2] = b;
+		printf("rgb = (%f, %f, %f)\n", colors[index], colors[index + 1], colors[index + 2]);
 	}
+	printf("Fill colors: Done\n");
 }
 
 

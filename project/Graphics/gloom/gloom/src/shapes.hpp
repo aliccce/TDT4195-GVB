@@ -4,6 +4,7 @@
 #define TRIANGLE 3
 #define THREE_VALUES 3
 #define TINY_TRIANGLE_SCALE 0.7
+#define SHADE 0.1
 
 #ifndef PI 
 	#define PI 3.14159265
@@ -18,8 +19,11 @@ unsigned int createA(float r, float g, float b);
 
 void createTriangleVertices(float* vertices, float scale);
 void moveTriangle(float* triangle, float distance);
-void fillColors(float* colors, int length, float r, float g, float b);
+void fillColors(float* colors, size_t length, float r, float g, float b);
 
-
+void extrude(float bufferVertices[], size_t bvLen,
+	unsigned int bufferIndices[], size_t biLen,
+	float vertices[], size_t vLen,
+	unsigned int indices[], size_t iLen, float height, int startOnOne);
 
 float toRadians(float angleDegrees);
