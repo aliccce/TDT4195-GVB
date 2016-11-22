@@ -218,20 +218,12 @@ def fig_in_square(img, binary, y, x):
 
         sum_x = 0
         sum_y = 0
+        string = str(x) + " " + str(y) + " " + str(shapes[best_col]) + " " + str(colors[best_col][0]) + " " + str(colors[best_col][1]) + " " + str(colors[best_col][2])
+        return string
 
-        """"
-        for point in pixels:
-            y = point[0]
-            x = point[1]
-
-            sum_y += y
-            sum_x += x
-
-        x_coord = sum_x/len(pixels)
-        y_coord = sum_y/len(pixels)
-        """
     else:
         print "Not enough white to consider a figure"
+        return ""
 
 """Some kernels"""
 
@@ -252,25 +244,26 @@ sobel_y = [[1, 2, 1], [0, 0, 0], [-1, -2, -1]]
 
 global shapes
 shapes = {
-    "red":"pacman",
-    "green":"trapez",
-    "blue":"star",
-    "purple":"triangle1",
-    "yellow":"triangle2",
-    "white":"hex1",
-    "black":"hex2",
+
+    "white":0,       #hex1
+    "blue":1,        #star
+    "red":2,         #pacman
+    "yellow":3,      #triangle2
+    "purple":4,      #triangle1
+    "green":5,       #trapez
+    "black":6,       #hex2
 }
 
 """Colors"""
 
 global colors
 colors = {
-    "red":[210,60,40],
-    "green":[100,145,65],
-    "blue":[70, 60, 115],
-    "purple":[135, 30, 95],
-    "yellow":[215, 185, 45],
     "white":[170, 170, 170],
+    "blue":[70, 60, 115],
+    "red":[210,60,40],
+    "yellow":[215, 185, 45],
+    "purple":[135, 30, 95],
+    "green":[100,145,65],
     "black":[30, 30, 30],
 }
 
@@ -293,10 +286,17 @@ width = magnitude.shape[1]
 squares_y = height / 100
 squares_x = width / 100
 
+#Write to file
+filepath = './communication.txt'
+f = open(filepath, 'a')
+
 for x in range(squares_x):
     for y in range(squares_y):
-        fig_in_square(image_color, thresholded, y, x)
-        print
+        writestring = fig_in_square(image_color, thresholded, y, x)
+        f.write(writestring)
+        f.write('\n')
+
+f.close()
 
 
 plot_fig(magnitude, 'gray', 'magn')
