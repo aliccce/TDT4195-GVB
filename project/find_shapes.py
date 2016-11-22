@@ -190,7 +190,7 @@ def fig_in_square(img, binary, y, x):
     #The +/- 2 is to avoid the pixels on the edges
     for i in range(y * square_size + 2, y * square_size + 100 - 2):
         for j in range(x * square_size + 2, x * square_size + 100 - 2):
-            if (j < b - 1 and i < a - 1):
+            
                 if binary[i][j] == 255: #Found white
                     pixels.append([i, j])
 
@@ -218,7 +218,9 @@ def fig_in_square(img, binary, y, x):
 
         sum_x = 0
         sum_y = 0
-        string = str(x) + " " + str(y) + " " + str(shapes[best_col]) + " " + str(colors[best_col][0]) + " " + str(colors[best_col][1]) + " " + str(colors[best_col][2])
+        center_x = 0
+        center_y = 0
+        string = str(y) + " " + str(x) + " " + str(shapes[best_col]) + " " + str(center_x) + " " + str(center_y)
         return string
 
     else:
@@ -293,8 +295,9 @@ f = open(filepath, 'a')
 for x in range(squares_x):
     for y in range(squares_y):
         writestring = fig_in_square(image_color, thresholded, y, x)
-        f.write(writestring)
-        f.write('\n')
+        if(writestring != ""):
+            f.write(writestring)
+            f.write('\n')
 
 f.close()
 
