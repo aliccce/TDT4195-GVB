@@ -2,6 +2,8 @@ import numpy as np
 from scipy import misc
 import matplotlib.pyplot as plt
 
+from scipy import misc, fftpack, ndimage
+
 def read_img(path):
 	image = misc.imread(path)
 	return image
@@ -77,94 +79,161 @@ def linear_comb(img, kernel):
 
     return new_img 
 
-def search_cols(img):
+def threshold(im, a=255/2, max=255):
+    new = np.where(im > a, max, 0)
+    return new
 
-    """
-    green:355, 50
-    yellow:440, 30
-    red:750, 80
-    black:555, 150
-    purple:460, 450
-    white:365, 255
-    """
+def manhattan_dist(col1, col2):
+    dist = np.absolute(int(col1[0]) - int(col2[0])) + np.absolute(int(col1[1]) - int(col2[1])) + np.absolute(int(col1[2]) - int(col2[2]))
+    return dist
 
-    """
-    print 'green:', cols_at_coord(img, 355, 50)
-    print 'yellow:', cols_at_coord(img, 440, 30)
-    print 'black:', cols_at_coord(img, 555, 150)
-    print 'purple:', cols_at_coord(img, 460, 450)
-    print 'white:', cols_at_coord(img, 255, 255)
-    """
+"""
+def process_blob(blob):
+    pixels = blob.size
 
-    a = img.shape[0] #height
-    b = img.shape[1] #width
+    if pixels > 500:
+        best_score = float('inf')
+        best_col = None
+        for test_col in colors:
+            score = compare_colors(colors[test_col], color)
+            if(score < best_score):
+                best_score = score
+                best_col = test_col
 
-    new_img = np.zeros_like(image[...,0])
+        print(best_col, shapes[best_col])
 
-    prev_col = -1
-    curr_col = -3
+        #And then we need to find center somehow - average of everything?
 
-    for y in range(a):
-        for x in range(b):
-            curr_col = img[y][x]
-            if curr_col == prev_col:
-                new_img[y][x] = 0
-            else:
-                new_img[y][x] = 255
-            prev_col = curr_col
+        sum_x = 0
+        sum_y = 0
 
-    return new_img
+        for point in blob:
+            y = point[0]
+            x = point[1]
 
-    #in square 0: x:0-100, y:0-100
+            sum_y += y
+            sum_x += x
 
-def images_equal(img1, img2):
-    # 1 and 2 have to be the same size, obv
-    a = img1.shape[0]
-    b = img1.shape[1]
+        x_coord = sum_x/len(blob)
+        y_coord = sum_y/len(blob)
 
-    for y in range(b):
-        for x in range(a):
-            if img1[x, y] != img2[x, y]:
-                # No need to search anymore, not equal
-                return False
+"""
 
-    # Made it through the loop, all x,y pairs equal
-    return True
+def flip_kernel(kernel):
+    new_kernel = np.zeros_like(kernel)
 
-def grow_seeds(img, seeds):
-    # Takes in an image segmented in to two parts, labeled 1 and 0
-    a = img.shape[0]
+    for y in range(1, kernel.shape[0] + 1):
+        for x in range(1, kernel.shape[1] + 1):
+            new_kernel[y - 1, x - 1] = kernel[-y, -x]
+
+    return new_kernel
+
+def convolution(image, kernel):
+    # Make sure the kernel is actually a np.matrix. This way, the argument can be a two-dimensional python list.
+    kernel = np.matrix(kernel)
+
+    # Assuming n x n-kernel
+    n = kernel.shape[0] // 2
+    new_image = np.zeros_like(image)
+
+    num_of_rows = image.shape[0]
+    num_of_cols = image.shape[1]
+
+    #Flips kernel, and runs correlation
+    flipped_kernel = flip_kernel(kernel)
+
+    for y in range(num_of_rows):
+        for x in range(num_of_cols):
+            # Iterates through each pixel in the image
+
+            accumulator = 0
+
+            for kernel_row in range(-n, n):
+                for kernel_col in range(-n, n):
+                    image_row = y + kernel_row
+                    image_col = x + kernel_col
+
+                    if image_row < 0 or image_row >= num_of_rows or image_col < 0 or image_col >= num_of_cols:
+                        # Checks whether the kernel is at the edges of the image
+                        accumulator += 0
+                    else:
+                        accumulator += image[image_row, image_col] * flipped_kernel[kernel_row, kernel_col]
+
+            new_image[y, x] = np.float32(accumulator)
+    return new_image
+
+def calculate_magnitude(image_x, image_y):
+    new_image = np.zeros_like(image_x)
+
+    rows = image_x.shape[0]
+    columns = image_x.shape[1]
+
+    for y in range(rows):
+        for x in range(columns):
+            new_image[y, x] = np.sqrt(image_x[y, x]**2 + image_y[y, x]**2)
+
+    return new_image
+
+def fig_in_square(img, binary, y, x):
+
+
+    pixels = []
+    #Should pick its sample node base on a good guess
+    
+    dom_col = None
+    #dom_col = [img[50][350][0], img[50][350][1], img[50][350][2]]
+    square_size = 100
+
+    a = img.shape[0] #y, i, a
     b = img.shape[1]
+    print "y,x:", y * square_size, x * square_size
+    #The +/- 2 is to avoid the pixels on the edges
+    for i in range(y * square_size + 2, y * square_size + 100 - 2):
+        for j in range(x * square_size + 2, x * square_size + 100 - 2):
+            if (j < b - 1 and i < a - 1):
+                if binary[i][j] == 255: #Found white
+                    pixels.append([i, j])
 
-    g = np.zeros([a, b], dtype=int)
+    print "len(pixels): ", len(pixels)
+    if (len(pixels) > 250): #consider there to be enough pixels to be a figure
 
-    for seed in seeds:
-        # Check surrounding pixels
-        for y in range(-1, 2):
-            for x in range(-1, 2):
+        #Pick the pixel with the most neighbors as reference
+        sample_x = x * square_size + square_size / 2
+        sample_y = y * square_size + square_size / 2
+        sample = img[sample_y][sample_x]
+        dom_col = [sample[0], sample[1], sample[2]]
 
-                m = seed[1] + y
-                n = seed[0] + x
 
-                if (img[m, n] == 1):
-                    g[m, n] = 255
+        best_score = float('inf')
+        best_col = None
+        for test_col in colors:
+            score = manhattan_dist(colors[test_col], dom_col)
+            if(score < best_score):
+                best_score = score
+                best_col = test_col
 
-    # To check if any occurences has happened to g
-    prev_g = np.zeros([a, b], dtype=int)
+        print(best_col, shapes[best_col])
 
-    while (not (images_equal(prev_g, g))):  # Stop when they are the same, no more changes
-        prev_g = np.copy(g)
-        for y in range(b):
-            for x in range(a):  # All pixels of img
-                if (g[x, y] == 255):  # Here's a white pixel in g, try to grow it
-                    for k in range(-1, 2):
-                        for j in range(-1, 2):  # Check 8 surrounding pixels
-                            if (x + j < a and y + k < b and img[
-                                    x + j, y + k] == 1):  # Make sure we don't go past the edge
-                                g[x + j, y + k] = 255
+        #And then we need to find center somehow - average of everything?
 
-    return g
+        sum_x = 0
+        sum_y = 0
 
+        """"
+        for point in pixels:
+            y = point[0]
+            x = point[1]
+
+            sum_y += y
+            sum_x += x
+
+        x_coord = sum_x/len(pixels)
+        y_coord = sum_y/len(pixels)
+        """
+    else:
+        print "Not enough white to consider a figure"
+
+"""Some kernels"""
 
 kernel3 = [ [1, 2, 1],
             [2, 4, 2],
@@ -176,16 +245,64 @@ kernel5 = [  [1,4,6,4,1],
             [4,16,24,16,4],
             [1,4,6,4,1] ]
 
-image = read_img('./images/easy01.png')
-grey_img = rgb2gray(image)
-grey_img = linear_comb(grey_img, kernel5)
+sobel_x = [[1, 0, -1], [2, 0, -2], [1, 0, -1]]
+sobel_y = [[1, 2, 1], [0, 0, 0], [-1, -2, -1]]
 
-new_image = search_cols(grey_img)
+"""Shapes"""
 
-plot_fig(grey_img, 'gray', 'grey')
+global shapes
+shapes = {
+    "red":"pacman",
+    "green":"trapez",
+    "blue":"star",
+    "purple":"triangle1",
+    "yellow":"triangle2",
+    "white":"hex1",
+    "black":"hex2",
+}
 
-plot_fig(image, 'none', 'original')
-plot_fig(new_image, 'gray', 'experiment')
+"""Colors"""
+
+global colors
+colors = {
+    "red":[210,60,40],
+    "green":[100,145,65],
+    "blue":[70, 60, 115],
+    "purple":[135, 30, 95],
+    "yellow":[215, 185, 45],
+    "white":[170, 170, 170],
+    "black":[30, 30, 30],
+}
+
+
+#image = read_img('./images/easy01.png')
+path = './images/easy01.png'
+image = misc.imread(path, flatten = True)
+image_color = misc.imread(path)
+
+
+resultx = convolution(image, sobel_x)
+resulty = convolution(image, sobel_y)
+magnitude = calculate_magnitude(resultx, resulty)
+
+thresholded = threshold(magnitude, a = 25)
+
+#Iterate over in 100s (squares) to see who belong together
+height = magnitude.shape[0]
+width = magnitude.shape[1]
+squares_y = height / 100
+squares_x = width / 100
+
+for x in range(squares_x):
+    for y in range(squares_y):
+        fig_in_square(image_color, thresholded, y, x)
+        print
+
+
+plot_fig(magnitude, 'gray', 'magn')
+plot_fig(image, 'gray', 'image')
+plot_fig(thresholded, 'gray', 'thresholded')
+plot_fig(image_color, 'none', 'color')
 
 plt.show()
 
