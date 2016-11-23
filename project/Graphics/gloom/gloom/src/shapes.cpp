@@ -4,6 +4,12 @@
 #include <stdlib.h> /* malloc */
 #include <math.h>	/* sin, cos, fabs */
 #include <vao.hpp>
+#include "glm/gtx/transform.hpp"
+#include "glm/vec3.hpp"
+#include "glm/mat4x4.hpp"
+
+#define SCALE_FACTOR 0.08
+#define GRID_SIZE 0.2
 
 unsigned int createPolygon(int n, float r, float g, float b, int quadrants, float height) {
 	/* Returns a float array with coordinates on the form x, y, z of a polygon with n edges. 
@@ -463,7 +469,39 @@ void extrude(float bufferVertices[], size_t bvLen,
 }
 
 
+void Shape::makeShape()
+{
+	switch (this->shapeType)
+	{
+	case 0:
+		this->setVaoID(createPolygon(6, 0.95, 0.96, 0.95));
+		break;
+	case 1:
+		this->setVaoID(createStar(0.34, 0.31, 0.56));
+		break;
+	case 2:
+		this->setVaoID(createPolygon(20, 0.89, 0.20, 0.17, 3));
+		break;
+	case 3:
+		this->setVaoID(createA(0.96, 0.91, 0.16));
+		break;
+	case 4:
+		this->setVaoID(createTriangle(0.73, 0.32, 0.57));
+		break;
+	case 5:
+		this->setVaoID(createParallellogram(0.42, 0.69, 0.24));
+		break;
+	case 6:
+		this->setVaoID(createPolygon(6, 0.094, 0.093, 0.093));
+		break;
+	}
+}
 
+void Shape::model()
+{
+	this->modelMatrix = (glm::mat4x4) glm::scale(glm::vec3(SCALE_FACTOR, SCALE_FACTOR, SCALE_FACTOR)) * modelMatrix;
+	this->modelMatrix = (glm::mat4x4) glm::translate(glm::vec3(-0.90 + this->row * GRID_SIZE, 0.0, -0.9 + this->col * GRID_SIZE)) * modelMatrix;
+}
 
 
 

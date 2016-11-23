@@ -7,13 +7,13 @@
 
 #include "PATH.hpp"
 #include "camera.hpp"
-#include "checkerboard.hpp"
-#include "shapes.hpp"
 
+#include "readBoard.hpp"
 
 
 // Create camera-object
 Camera camera = Camera(0.1f, 0.1f);
+
 
 // Uniform matrix
 glm::mat4x4 matrix(1); 
@@ -35,8 +35,20 @@ void runProgram(GLFWwindow* window)
 
 	// Set up your scene here (create Vertex Array Objects, etc.)
 
-	//unsigned int board = createBoard(5, 8);
-	unsigned int shape = createParallellogram(0.0f, 1.0f, 0.5f);
+	Board *board = new Board(5, 8);
+	readFile(board, "C:/Users/alice/Documents/GitHub/tdt4195-gvb/project/Graphics/gloom/gloom/src/example.txt");
+	printf("board size %d", board->pieces.size());
+	
+	for (size_t index = 0; index < board->pieces.size(); index++)
+	{
+		Shape *piece = board->pieces[index];
+		printf("\n%d,     ", piece->vaoID);
+		piece->makeShape();
+		piece->model();
+		printf("%d\n", piece->vaoID);
+
+	}
+
 
 
 	// Create SHADERS
@@ -67,9 +79,17 @@ void runProgram(GLFWwindow* window)
 		glUniformMatrix4fv(2, 1, GL_FALSE, glm::value_ptr(matrix));
 
 		// Bind and draw VAO
-		glBindVertexArray(shape);
+		glBindVertexArray(board->boardId);
+		glDrawElements(GL_TRIANGLES, 999, GL_UNSIGNED_INT, 0);
 
-		glDrawElements(GL_TRIANGLES, 200, GL_UNSIGNED_INT, 0);
+		for (Shape *piece : board->pieces)
+		{
+			glBindVertexArray(piece->vaoID);
+			glUniformMatrix4fv(2, 1, GL_FALSE, glm::value_ptr(matrix * piece->modelMatrix));
+
+			glDrawElements(GL_TRIANGLES, 999, GL_UNSIGNED_INT, 0);
+		}
+
 
 
 		// Deactivate the shader
@@ -108,4 +128,3 @@ void keyboardCallback(GLFWwindow* window, int key, int scancode,
 		else if (key == GLFW_KEY_D) { matrix *= camera.lookRight();	}
 	}
 }
-

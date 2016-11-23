@@ -1,13 +1,26 @@
 #include "vao.hpp"
+#include "checkerboard.hpp"
 #include <io.h>
 
-unsigned int createBoard(int n, int m)
+
+Board::Board(unsigned int n, unsigned int m)
+{
+	this->n = n;
+	this->m = m;
+	this->boardId = createBoard();
+}
+
+
+unsigned int Board::createBoard()
 {
 	/* Creates a nxm checkered board with 0.1*0.1 squares, starting in upper left corner. 
 	It is made on the xz plane, meaning that the world needs to be tilted for the board to show.
 	Each square consists of two triangles, made with four nodes.
 	
 	Returns a VAO with vertices and colors in the VBO */
+	int n = this->n;
+	int m = this->m;
+
 
 	const int numOfValues = n * m * 4 * 3;			// n*m squares with four coordinates, each with three values (to build two triangles)
 	const int numOfIndices = n * m * 2 * 3;		// n*m squares with two triangles consisting of three corners
