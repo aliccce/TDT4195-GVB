@@ -83,41 +83,13 @@ def threshold(im, a=255/2, max=255):
     new = np.where(im > a, max, 0)
     return new
 
+def remove_small_elements(image, structure=None):
+    new_image = ndimage.morphology.binary_opening(image, structure=structure, iterations=1).astype(int)
+    return new_image
+
 def manhattan_dist(col1, col2):
     dist = np.absolute(int(col1[0]) - int(col2[0])) + np.absolute(int(col1[1]) - int(col2[1])) + np.absolute(int(col1[2]) - int(col2[2]))
     return dist
-
-"""
-def process_blob(blob):
-    pixels = blob.size
-
-    if pixels > 500:
-        best_score = float('inf')
-        best_col = None
-        for test_col in colors:
-            score = compare_colors(colors[test_col], color)
-            if(score < best_score):
-                best_score = score
-                best_col = test_col
-
-        print(best_col, shapes[best_col])
-
-        #And then we need to find center somehow - average of everything?
-
-        sum_x = 0
-        sum_y = 0
-
-        for point in blob:
-            y = point[0]
-            x = point[1]
-
-            sum_y += y
-            sum_x += x
-
-        x_coord = sum_x/len(blob)
-        y_coord = sum_y/len(blob)
-
-"""
 
 def flip_kernel(kernel):
     new_kernel = np.zeros_like(kernel)
@@ -174,6 +146,8 @@ def calculate_magnitude(image_x, image_y):
 
     return new_image
 
+
+
 def fig_in_square(img, binary, y, x):
 
 
@@ -195,7 +169,7 @@ def fig_in_square(img, binary, y, x):
                     pixels.append([i, j])
 
     print "len(pixels): ", len(pixels)
-    if (len(pixels) > 250): #consider there to be enough pixels to be a figure
+    if (len(pixels) > 100): #consider there to be enough pixels to be a figure
 
         #Pick the pixel with the most neighbors as reference
         sample_x = x * square_size + square_size / 2
@@ -242,6 +216,9 @@ kernel5 = [  [1,4,6,4,1],
 sobel_x = [[1, 0, -1], [2, 0, -2], [1, 0, -1]]
 sobel_y = [[1, 2, 1], [0, 0, 0], [-1, -2, -1]]
 
+test_x = [[-1, 1], [-1, 1]]
+test_y = [[1, 1], [-1, -1]]
+
 """Shapes"""
 
 global shapes
@@ -275,12 +252,23 @@ path = './images/easy01.png'
 image = misc.imread(path, flatten = True)
 image_color = misc.imread(path)
 
+image = linear_comb(image, kernel3)
 
 resultx = convolution(image, sobel_x)
 resulty = convolution(image, sobel_y)
 magnitude = calculate_magnitude(resultx, resulty)
 
 thresholded = threshold(magnitude, a = 25)
+
+"""
+#Noise reduction
+thresholded1 = threshold(thresholded, max=1)
+print thresholded1
+clean_thresh = remove_small_elements(thresholded, structure = [[1,1],[1,1]])
+print clean_thresh
+clean_thresh = threshold(clean_thresh, a=0.5, max=255)
+print clean_thresh
+"""
 
 #Iterate over in 100s (squares) to see who belong together
 height = magnitude.shape[0]
@@ -290,7 +278,7 @@ squares_x = width / 100
 
 #Write to file
 filepath = './communication.txt'
-f = open(filepath, 'a')
+f = open(filepath, 'w')
 
 for x in range(squares_x):
     for y in range(squares_y):
@@ -304,7 +292,10 @@ f.close()
 
 plot_fig(magnitude, 'gray', 'magn')
 plot_fig(image, 'gray', 'image')
+plot_fig(resultx, 'gray', 'sobel_x')
+plot_fig(resulty, 'gray', 'sobel_y')
 plot_fig(thresholded, 'gray', 'thresholded')
+#plot_fig(clean_thresh, 'gray', 'clean_thresh')
 plot_fig(image_color, 'none', 'color')
 
 plt.show()
